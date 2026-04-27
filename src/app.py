@@ -78,7 +78,7 @@ def getOrders():
         order = order.first()
         order_dict = order.to_mongo().to_dict()
         order_dict['_id'] = str(order_dict['_id']) 
-        return jsonify({'success': order_dict})#value})
+        return jsonify({'success': order_dict})
 
 
 #=============
@@ -211,6 +211,80 @@ def submit_form():
     new_order.save()
     return jsonify({"message": f"Hi {name}, your order has been place on {orderDate}"})
 
+#Route to delete the order.
+@app.route("/delete_order", methods=["post"])
+def deleteOrder():
+    #Get the fields name and order date.
+    data = request.get_json()
+    orderDate = data.get("ordDate")
+    name = data.get("name")
+    print(name)
+    print(orderDate)
+
+    currOrder = Orders.objects(name=name, orderDate=orderDate)
+
+    if not currOrder:
+        return jsonify({'error':'Unable to find the order'})
+    else:
+        currOrder.delete()
+    
+    status_message = f"Hi {name}, your order has been cancelled."
+    return jsonify({"success": status_message})
+
+
+#Updates the price and cart entries.
+def updatePrice(products):
+
+    updatedCart = []
+    total = 0
+    for item in products:
+        
+        #Only add items that are present.
+        if (item['quantity']> 0):
+
+            currPrice = int(item['quantity'])* float(item['pricePer'])
+            #Update total
+            total+= currPrice
+            updatedCart.append(item)
+
+    return updatedCart, total
+
+
+#Update the order quantity.
+@app.route("/update_order", methods=["post"])
+def updateOrder():
+    data = request.get_json()
+
+    items = data.get("products")
+    customer = data.get("customer")
+    dateOrder = data.get("dateOrder")
+
+    #Get the order info.
+    order = Orders.objects(name=customer, orderDate=dateOrder).first()
+
+    #Order exists.
+    if order:
+        cart,total_update = updatePrice(items)
+
+        #Check if cart is empty
+        if not cart:
+            order.delete()
+            return jsonify({"success": "Order Deleted Successfully","order":False})
+        else:
+            order.items = cart
+            
+            #Update the price and save.
+            order.totalPrice = total_update +float(order.shipPrice)
+            order.save()
+
+            order_dict = order.to_mongo().to_dict()
+            order_dict['_id'] = str(order_dict['_id']) 
+            return jsonify({"success": "Order Updated Successfully","order":order_dict})
+
+    else:
+        return jsonify({"failure": "Failed to update the order"})
+
+
 if __name__ =='__main__':
-    app.run()#debug=True)
+    app.run(debug=True)
 

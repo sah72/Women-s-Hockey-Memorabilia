@@ -6,10 +6,10 @@ document.getElementById("orderBtn").addEventListener("click", function (event) {
   const info = Object.fromEntries(new FormData(form_).entries());
   const inputs = document.querySelectorAll("#cartOrder input");
 
-  var tagName ="response";
+  var tagName = "response";
   //Check all the form entries not blank.
   var value = checkForm(inputs, tagName);
-  if (!value){
+  if (!value) {
     return;
   }
 
@@ -67,8 +67,8 @@ document.getElementById("orderBtn").addEventListener("click", function (event) {
 
 //Function to check if the form entries are all filled.
 //Takes the form input, and the tag name to update for any errors.
-function checkForm(formInput, tagName){
-   // Check form has valid entries in the form.
+function checkForm(formInput, tagName) {
+  // Check form has valid entries in the form.
   var isValid = true;
   formInput.forEach((input) => {
     //If anything is empty we can't place the order.
@@ -88,7 +88,7 @@ function checkForm(formInput, tagName){
 }
 
 //Zero value
-const zero_=0;
+const zero_ = 0;
 
 // Remove items in shopping cart and set totals to zero.
 function resetCart() {
@@ -115,7 +115,7 @@ function resetCart() {
     $(item).text(zero_);
   }
 
-  //Update the cart on the 
+  //Update the cart on the
   document.getElementById("cartCount").textContent = zero_;
 
   // Update Total and subtotal to zero.
@@ -137,16 +137,12 @@ document.querySelectorAll(".cardBtn").forEach((button) => {
   });
 });
 
-
 let count = 0;
 //Update the naviation Cart
-function updateNavCart(value){
-  count+=value;
+function updateNavCart(value) {
+  count += value;
   document.getElementById("cartCount").textContent = count;
 }
-
-
-
 
 //Update the price on the page
 function updatePrice(price, product, itemAdd) {
@@ -274,7 +270,8 @@ function updateCart(product, itemAdd) {
       });
       const removeButt = document.querySelectorAll(".removeItem");
       removeButt.forEach((reButton) => {
-        reButton.disabled = false;});
+        reButton.disabled = false;
+      });
     }
     $("#maskCart").text(intValue);
   }
@@ -295,7 +292,7 @@ function updateCart(product, itemAdd) {
       });
       const removeButt = document.querySelectorAll(".removeItem");
       removeButt.forEach((reButton) => {
-      reButton.disabled = false;
+        reButton.disabled = false;
       });
     }
     $("#stickCart").text(intValue);
@@ -317,7 +314,8 @@ function updateCart(product, itemAdd) {
       });
       const removeButt = document.querySelectorAll(".removeItem");
       removeButt.forEach((reButton) => {
-        reButton.disabled = false;});
+        reButton.disabled = false;
+      });
     }
     $("#tShirt").text(intValue);
   }
@@ -335,11 +333,11 @@ $("#shipDrop").change(function () {
   var ship = zero_;
 
   if (selectedValue === "europe") {
-    ship = 10.00;
+    ship = 10.0;
   } else if (selectedValue === "asia") {
-    ship = 7.00;
+    ship = 7.0;
   } else if (selectedValue === "northAmerica") {
-    ship = 5.00;
+    ship = 5.0;
   }
   //Sets shipping cost to two decimal places.
   $("#shipCost").text(ship.toFixed(2));
@@ -359,12 +357,14 @@ document.getElementById("sendMessage").addEventListener("click", function (e) {
 
   const form_ = document.getElementById("contForm");
   const pay = Object.fromEntries(new FormData(form_).entries());
-  const formFields = document.querySelectorAll("#contForm input, #contForm textarea");
+  const formFields = document.querySelectorAll(
+    "#contForm input, #contForm textarea",
+  );
 
-  var tagName ="messResponse";
+  var tagName = "messResponse";
   var allEntries = checkForm(formFields, tagName);
- 
-  if(!allEntries){
+
+  if (!allEntries) {
     return;
   }
 
@@ -404,7 +404,7 @@ document.getElementById("searchBar").addEventListener("submit", function (e) {
     { keywords: ["contact", "cont", "us"], id: "contact" },
     {
       keywords: ["track", "order", "search", "track order", "search order"],
-      id: "orderHistory",
+      id: "trackOrderSection",
     },
   ];
 
@@ -446,7 +446,7 @@ function adjustCart(quant, product, displayBox, price) {
   if ((quant == zero_) & (intValue == 1)) {
     intValue -= 1;
     updatePrice(price * -1, product);
-     updateNavCart(-1);
+    updateNavCart(-1);
     document.getElementById(displayBox).style.display = "none";
   }
   //Subtract from the cart
@@ -465,7 +465,137 @@ function adjustCart(quant, product, displayBox, price) {
   $(product).text(intValue);
 }
 
-// History button
+//Create the order retrieval table.
+//Takes the order object from database and the HTML parent.
+function createOrderTable(orderResults, order) {
+  var boldText = document.createElement("strong");
+
+  const title = document.createElement("h2");
+  title.textContent = `Order Summary`;
+  orderResults.appendChild(title);
+
+  const cust = document.createElement("p");
+  boldText.textContent = "Customer Name: ";
+  cust.appendChild(boldText);
+
+  //Assign the span to name in order to delete later
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = order.name;
+  nameSpan.id = "CustomerName";
+
+  cust.append(nameSpan);
+  orderResults.appendChild(cust);
+
+  const date = document.createElement("p");
+  var dateText = document.createElement("strong");
+  dateText.textContent = `Date Ordered: `;
+  date.append(dateText);
+
+  //Assign the element ID in order to delete later.
+  const dateSpan = document.createElement("span");
+  dateSpan.textContent = order.orderDate;
+  dateSpan.id = "DateOrdered";
+
+  date.append(dateSpan);
+  orderResults.appendChild(date);
+
+  const city = document.createElement("p");
+  var cityText = document.createElement("strong");
+  cityText.textContent = `Location: `;
+  city.append(cityText);
+  city.append(order.city);
+  orderResults.appendChild(city);
+
+  //Create a table for the products, quantity and price.
+  var table = document.createElement("table");
+  table.id = "itemTable";
+  const descRow = document.createElement("tr");
+  const description = ["Item", "Quantity", "Unit Price"];
+
+  //Loop through the headers.
+  description.forEach((head) => {
+    const sec = document.createElement("th");
+    sec.textContent = head;
+    descRow.appendChild(sec);
+  });
+  table.appendChild(descRow);
+
+  //Add each product to the table.
+  for (var item of order.items) {
+    const row = document.createElement("tr");
+
+    const prod = document.createElement("td");
+    prod.textContent = item.productName;
+    prod.className = "prod-name";
+
+    const quant = document.createElement("td");
+    quant.className = "qty-cell";
+    quant.textContent = item.quantity;
+
+    const priceSec = document.createElement("td");
+    const spanPrice = document.createElement("span");
+
+    spanPrice.textContent = `${item.pricePer.toFixed(2)}`;
+    priceSec.textContent = "$";
+    spanPrice.className = "price-per";
+
+    priceSec.append(spanPrice);
+    row.append(prod);
+    row.appendChild(quant);
+
+    row.appendChild(priceSec);
+    table.appendChild(row);
+  }
+  orderResults.appendChild(table);
+
+  //Add a break
+  const space_ = document.createElement("br");
+  orderResults.appendChild(space_);
+
+  const shipPrice = document.createElement("p");
+  var strongText = document.createElement("strong"); //Bold
+  strongText.textContent = `Shipping Price: $${order.shipPrice.toFixed(2)}`;
+  shipPrice.append(strongText);
+  orderResults.appendChild(shipPrice);
+
+  const totalPrice = document.createElement("p");
+  var totalText = document.createElement("strong"); //Bold
+  totalText.textContent = `Total Price: $${order.totalPrice.toFixed(2)}`;
+  totalPrice.append(totalText);
+  orderResults.appendChild(totalPrice);
+
+  //Create a div to format buttons
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-group";
+
+
+  //Create the edit order button
+  var editOrd = document.createElement("button");
+  editOrd.textContent = "Edit";
+  editOrd.id = "editButton";
+  // orderResults.appendChild(editOrd);
+
+  //Create the update order button
+  var upOrd = document.createElement("button");
+  upOrd.textContent = "Update";
+  upOrd.id = "updateButton";
+  // orderResults.appendChild(upOrd);
+
+  //Create the delete order button
+  var deleteOrd = document.createElement("button");
+  deleteOrd.textContent = "Cancel";
+  deleteOrd.id = "deleteButton";
+
+  // orderResults.appendChild(deleteOrd);
+
+  buttonContainer.appendChild(editOrd);
+  buttonContainer.appendChild(upOrd);
+  buttonContainer.appendChild(deleteOrd);
+
+  orderResults.appendChild(buttonContainer);
+}
+
+// Track the order history of an email/name.
 document
   .getElementById("ordSearchBtn")
   .addEventListener("click", function (event) {
@@ -473,8 +603,8 @@ document
 
     const form_ = document.getElementById("historyForm");
     const pay = Object.fromEntries(new FormData(form_).entries());
+    console.log(pay);
 
-    //Check form is blank.
     const isName = document.getElementById("histName").value.trim();
     const isEmail = document.getElementById("histEmail").value.trim();
 
@@ -488,7 +618,6 @@ document
       orderResults.appendChild(notFound);
       //Show content
       orderResults.style.display = "block";
-      // alert("Please enter either a name or email in Order History search");
       return;
     }
     //Create the payload
@@ -510,80 +639,7 @@ document
         //Creating HTMl elements to show the order info.
 
         if (order) {
-          var boldText = document.createElement("strong");
-
-          const title = document.createElement("h2");
-          title.textContent = `Order Summary`;
-          orderResults.appendChild(title);
-
-          const cust = document.createElement("p");
-          boldText.textContent = "Customer: ";
-          cust.appendChild(boldText);
-          cust.append(order.name);
-          orderResults.appendChild(cust);
-
-          const date = document.createElement("p");
-          var dateText = document.createElement("strong");
-          dateText.textContent = `Date Ordered: `;
-          date.append(dateText);
-          date.append(order.orderDate);
-          orderResults.appendChild(date);
-
-          const city = document.createElement("p");
-          var cityText = document.createElement("strong");
-          cityText.textContent = `City: `;
-          city.append(cityText);
-          city.append(order.city);
-          orderResults.appendChild(city);
-
-          //Create a table for the products, quantity and price.
-          var table = document.createElement("table");
-          const descRow = document.createElement("tr");
-          const description = ["Product", "Quantity", "Price"];
-
-          //Loop through the headers.
-          description.forEach((head) => {
-            const sec = document.createElement("th");
-            sec.textContent = head;
-            descRow.appendChild(sec);
-          });
-          table.appendChild(descRow);
-
-          //Add each product to the table.
-          for (var item of order.items) {
-            const row = document.createElement("tr");
-
-            const prod = document.createElement("td");
-            prod.textContent = item.productName;
-
-            const quant = document.createElement("td");
-            quant.textContent = item.quantity;
-
-            const pricePer = document.createElement("td");
-            pricePer.textContent = `$${item.pricePer.toFixed(2)}`;
-
-            row.append(prod);
-            row.appendChild(quant);
-            row.appendChild(pricePer);
-            table.appendChild(row);
-          }
-          orderResults.appendChild(table);
-
-          //Add a break
-          const space_ = document.createElement("br");
-          orderResults.appendChild(space_);
-
-          const shipPrice = document.createElement("p");
-          var strongText = document.createElement("strong"); //Bold
-          strongText.textContent = `Shipping Price: $${order.shipPrice.toFixed(2)}`;
-          shipPrice.append(strongText);
-          orderResults.appendChild(shipPrice);
-
-          const totalPrice = document.createElement("p");
-          var totalText = document.createElement("strong"); //Bold
-          totalText.textContent = `Total Price: $${order.totalPrice.toFixed(2)}`;
-          totalPrice.append(totalText);
-          orderResults.appendChild(totalPrice);
+          createOrderTable(orderResults, order);
         } else {
           var notFound = document.createElement("h2");
           notFound.textContent = "No order found for this search";
@@ -594,28 +650,193 @@ document
       });
   });
 
-  //Remove an Item from the cart
-  // document.getElementById("removeItem").addEventListener("click", function (e) {
-    document.querySelectorAll(".removeItem").forEach((button) => {
+//Remove an Item from the cart
+document.querySelectorAll(".removeItem").forEach((button) => {
   button.addEventListener("click", function (event) {
-    // e.preventDefault();
+    event.preventDefault();
 
     const price = parseInt(this.dataset.price);
     const item = this.dataset.item;
     const product = this.dataset.id;
-  
+
     //Get the quantity.
     var itemQuant = $(product).text();
     var intValue = parseInt(itemQuant);
-    
+
     //Get the total price of item to update
-    var updatedTotal = price*(-1)* intValue;
+    var updatedTotal = price * -1 * intValue;
 
     //Update the price and cart display
     updatePrice(updatedTotal, product);
-    updateNavCart(intValue*-1);
+    updateNavCart(intValue * -1);
     $(product).text(zero_);
     document.getElementById(item).style.display = "none";
+  });
+});
 
+//Check the body action listener for dynamic buttons.
+document.body.addEventListener("click", function (event) {
+  //Check that the delete
+  if (event.target.id === "deleteButton") {
+    event.preventDefault(); // prevents page reload
+    //Confirm deletion
+    var result = confirm("Are you sure you want to cancel this order?");
+    if (result) {
+      deleteOrder();
+    }
+    return;
+  }
+
+  if (event.target.id === "editButton") {
+    event.preventDefault(); // prevents page reload
+    editOrder();
+    return;
+  }
+  if (event.target.id === "updateButton") {
+    event.preventDefault(); // prevents page reload
+    updateOrder();
+    return;
+  }
+});
+
+//Function to delete orders from the middleware.
+function deleteOrder() {
+  var name = document.getElementById("CustomerName").innerText;
+  var orderDate = document.getElementById("DateOrdered").innerText;
+
+  //In case there are blanks.
+  if (!name & !orderDate) {
+    alert("Something went wrong");
+    return;
+  }
+
+  //Create the payload.
+  const payload = {
+    name: name,
+    ordDate: orderDate,
+  };
+
+  // Send delete info to the flask application
+  fetch("/delete_order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      //Update the message to the user
+      const orderResults = document.getElementById("orderResults");
+
+      //Clear the contents.
+      orderResults.innerHTML = "";
+
+      var deleteHead = document.createElement("h2");
+      deleteHead.textContent = data.success;
+      orderResults.appendChild(deleteHead);
+
+      //Display the changes
+      orderResults.style.display = "block";
+    });
+}
+
+//Make the quantity of each item in the table editable
+function editOrder() {
+  const qtyCells = document.querySelectorAll(".qty-cell");
+
+  qtyCells.forEach((cell) => {
+    const currentValue = cell.textContent.trim();
+    cell.innerHTML = `<input type="number" class="qty-cell" 
+          style="width:70px;" value="${currentValue}" min="1">`;
+  });
+}
+
+//Update the order by sending the data to flask.
+function updateOrder() {
+  // Get the customer and date
+  var customer = document.getElementById("CustomerName").innerText;
+  var orderDate = document.getElementById("DateOrdered").innerText;
+
+  //Get the item list.
+  var rows = document.querySelectorAll("#itemTable tr"); //tbody tr");
+
+  const updateCart = [];
+  var count = 0;
+  var quantity = 0;
+
+  rows.forEach((row) => {
+    //Skip the table header row.
+    if (count < 1) {
+      count = count + 1;
+      return;
+    }
+
+    //Get the product name, quant and price.
+    const name = row.querySelector(".prod-name").textContent.trim();
+    quantity = row.querySelector(".qty-cell input").value;
+    const price = row.querySelector(".price-per").textContent;
+
+    //Add items to a list
+    updateCart.push({
+      productName: name,
+      quantity: Number(quantity),
+      pricePer: Number(price),
     });
   });
+  const qty = Number(quantity);
+
+  //Check if the cart will be empty
+  if (updateCart.length == 1 && qty === 0) {
+    var checkDelete = confirm("Are you sure you wish to delete your order?");
+    if (!checkDelete) {
+      return;
+    }
+  }
+
+  //Create the total price.
+  const payload = {
+    products: updateCart,
+    customer: customer,
+    dateOrder: orderDate,
+  };
+
+  // Send data to flask application
+  fetch("/update_order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const orderResults = document.getElementById("orderResults");
+      orderResults.innerHTML = "";
+
+      // When the order updated successfull.
+      if (data.order) {
+        const updateCart = document.createElement("h1");
+        updateCart.innerText = data.success;
+        orderResults.appendChild(updateCart);
+
+        //Show the time of order update
+        const changesSave = document.createElement("p");
+        const now = new Date();
+        const currTime = now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        changesSave.innerText = `Changes saved at ${currTime}`;
+        orderResults.appendChild(changesSave);
+
+        createOrderTable(orderResults, data.order);
+      } else {
+        const updateCart = document.createElement("h1");
+        updateCart.innerText = data.success;
+        orderResults.appendChild(updateCart);
+        orderResults.style.display = "block";
+      }
+    });
+}
