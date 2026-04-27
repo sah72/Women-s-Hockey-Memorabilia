@@ -22,6 +22,7 @@ A full stack web application that allows users to browse and purchase women’s 
 - Users can remove or update item quantities in the cart
 - Users can submit an order
 - Users can search or filter content (if applicable)
+- In the track order section you can edit or delete the order
 - Contact form submissions are stored in the database
 - System validates user input before processing
 
